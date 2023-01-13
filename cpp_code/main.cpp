@@ -4,9 +4,11 @@
 #include <cmath>
 #include <fstream>
 #include <string>
-#include <chrono>//exec
-using namespace std::chrono;
+// #include <chrono>//exec
+// using namespace std::chrono;
 
+//constants
+double EUCLIDEAN_DISTANCE_ERROR = 2e6;
 
 
 // Function to calculate the Euclidean distance between two audio frames
@@ -108,17 +110,27 @@ std::vector<std::vector<double>> readWAVFile(const std::string& fileName) {
     return samples;
 }
 
+std::string checkSawingSound(double similarity){
+    if (similarity > EUCLIDEAN_DISTANCE_ERROR){
+        return("Sawing Sound recognized!");
+    }
+    else {
+        return("No sawing sound");
+    }
+};
+
 int main() {
-    auto start = high_resolution_clock::now();
+    // auto start = high_resolution_clock::now();
     // Example usage of the dtw() function
     // std::vector<std::vector<double>> audio1 = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
     // std::vector<std::vector<double>> audio2 = {{20, 3, 40}, {5, 6, 7}, {8, 9, 10}};
-    std::vector<std::vector<double>> audio1 = readWAVFile("/home/shripad/college/audio_proj/dataset/TrimmedSawSound/file2.wav");
-    std::vector<std::vector<double>> audio2 = readWAVFile("/home/shripad/college/audio_proj/dataset/TrimmedSawSound/file3.wav");
-    double similarity = dtw(audio1, audio2);
-    std::cout << "Similarity: " << similarity << std::endl;
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start);
-    std::cout << duration.count() << std::endl;
+    std::vector<std::vector<double>> audio1 = readWAVFile("/home/shripad/college/audio_proj/dataset/saw_sound_for_test.wav");
+    std::vector<std::vector<double>> ref_sawing_sound = readWAVFile("/home/shripad/college/audio_proj/dataset/saw_sound_for_test.wav");
+    double similarity = dtw(audio1, ref_sawing_sound);
+    // std::cout << "Similarity: " << similarity << std::endl;
+    std::cout<<checkSawingSound(similarity)<<std::endl;
+    // auto stop = high_resolution_clock::now();
+    // auto duration = duration_cast<microseconds>(stop - start);
+    // std::cout << duration.count() << std::endl;
     return 0;
 }

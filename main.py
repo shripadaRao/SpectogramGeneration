@@ -67,6 +67,7 @@ def ComputeRMSEImages(im1, im2):
 # if ComputeRMSEImages("/home/shripad/college/audio_proj/spectograms/SawSound/file2.png", "/home/shripad/college/audio_proj/spectograms/AmbientSound/file1.png") < 0.20:    
 #     print("ALERT!!")
 
-
-print(ListenAudioInputFile("/home/shripad/college/audio_proj/dataset/TrueTest.wav","/home/shripad/college/audio_proj/spectograms/SawSound/file2.png"))
+start = time.time()
+print(ListenAudioInputFile("/home/shripad/college/audio_proj/dataset/TrimmedSawSound/file2.wav","/home/shripad/college/audio_proj/spectograms/SawSound/file2.png"))
 # print(ComputeRMSEImages("/home/shripad/college/audio_proj/spectograms/SawSound/file2.png","/home/shripad/college/audio_proj/spectograms/SawSound/file3.png"))
+print("exection time python: ",time.time() - start)
