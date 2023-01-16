@@ -4,11 +4,16 @@
 #include <cmath>
 #include <fstream>
 #include <string>
-// #include <chrono>//exec
-// using namespace std::chrono;
+#include <chrono>//exec
+#include <complex>
+#include <iostream>
+#include <valarray>
+
+using namespace std::chrono;
 
 //constants
-double EUCLIDEAN_DISTANCE_ERROR = 2e6;
+double EUCLIDEAN_DISTANCE_ERROR = 1.4e6;
+const double PI = 3.141592653589793238460;
 
 
 // Function to calculate the Euclidean distance between two audio frames
@@ -75,11 +80,12 @@ std::vector<std::vector<double>> readWAVFile(const std::string& fileName) {
     file.read((char*)&header, sizeof(WAVHeader));
 
     // Check that the file is a valid WAV file
-    if (std::string(header.chunkId, 4) != "RIFF" || std::string(header.format, 4) != "WAVE" ||
-        std::string(header.subchunk1Id, 4) != "fmt " || std::string(header.subchunk2Id, 4) != "data") {
-        std::cout << "Invalid WAV file: " << fileName << std::endl;
-        return {};
-    }
+    // if (std::string(header.chunkId, 4) != "RIFF" || std::string(header.format, 4) != "WAVE" ||
+    //     std::string(header.subchunk1Id, 4) != "fmt " || std::string(header.subchunk2Id, 4) != "data") {
+    //     std::cout << "Invalid WAV file: " << fileName << std::endl;
+    //     exit(0);
+    //     return {};
+    // }
 
     // Extract the number of channels, bits per sample, and number of samples from the header
     int numChannels = header.numChannels;
@@ -106,7 +112,9 @@ std::vector<std::vector<double>> readWAVFile(const std::string& fileName) {
                 return {};
             }
         }
-    }
+    };
+    // std::cout<<samples.str()<<std::endl;
+
     return samples;
 }
 
@@ -119,18 +127,63 @@ std::string checkSawingSound(double similarity){
     }
 };
 
+
+// Function to calculate the Euclidean distance between two audio signals
+double FindAudioEuclideanDistance(const std::vector<std::vector<double>>& s1, const std::vector<std::vector<double>>& s2) {
+    double distance = 0;
+    // assuming both signals have the same number of channels
+    int numChannels = s1.size();
+    for (int channel = 0; channel < numChannels; channel++) {
+            std::cout<<s1[channel].size();
+        for (int i = 0; i < s1[channel].size(); i++) {
+            distance += pow(s1[channel][i] - s2[channel][i], 2);
+        }
+    }
+    return sqrt(distance);
+}
+
+// int main() {
+//     // Example usage of the euclideanDistance() function
+//     std::vector<double> signal1 = {1, 2, 3, 4, 5};
+//     std::vector<double> signal2 = {5, 4, 3, 2, 1};
+//     double distance = euclideanDistance(signal1, signal2);
+//     std::cout << "Euclidean distance: " << distance << std::endl;
+//     return 0;
+// }
+
+// double EuclideanDistanceForVariedAmplitude() {}  
+
+void writeVectorToFile(const std::vector<std::vector<double>>& vec, const std::string& fileName) {
+    std::ofstream outFile(fileName);
+    if (!outFile.is_open()) {
+        std::cout << "Error opening file: " << fileName << std::endl;
+        return;
+    }
+    for (int i = 0; i < vec.size(); i++) {
+        for (int j = 0; j < vec[i].size(); j++) {
+            outFile << vec[i][j] << " ";
+        }
+        outFile<<"\n";
+        outFile << std::endl;
+    }
+    outFile.close();
+    std::cout << "Vector written to " << fileName << std::endl;
+}
+
 int main() {
-    // auto start = high_resolution_clock::now();
-    // Example usage of the dtw() function
-    // std::vector<std::vector<double>> audio1 = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
-    // std::vector<std::vector<double>> audio2 = {{20, 3, 40}, {5, 6, 7}, {8, 9, 10}};
-    std::vector<std::vector<double>> audio1 = readWAVFile("/home/shripad/college/audio_proj/dataset/saw_sound_for_test.wav");
-    std::vector<std::vector<double>> ref_sawing_sound = readWAVFile("/home/shripad/college/audio_proj/dataset/saw_sound_for_test.wav");
-    double similarity = dtw(audio1, ref_sawing_sound);
-    // std::cout << "Similarity: " << similarity << std::endl;
+    auto start = high_resolution_clock::now();
+    std::vector<std::vector<double>> audio1 = readWAVFile("/home/shripad/college/audio_proj/dataset/TrimmedAmbientSound/file2.wav");
+
+    std::vector<std::vector<double>> ref_sawing_sound = readWAVFile("/home/shripad/college/audio_proj/dataset/TrimmedSawSound/file2.wav");
+
+    writeVectorToFile(audio1,"/home/shripad/college/audio_proj/cpp_code/audio1.txt");
+
+    double similarity = FindAudioEuclideanDistance(audio1,ref_sawing_sound);    
+    std::cout << "Similarity: " << similarity << std::endl;
     std::cout<<checkSawingSound(similarity)<<std::endl;
-    // auto stop = high_resolution_clock::now();
-    // auto duration = duration_cast<microseconds>(stop - start);
-    // std::cout << duration.count() << std::endl;
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+    std::cout << duration.count() << std::endl;
+
     return 0;
 }
