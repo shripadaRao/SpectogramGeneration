@@ -66,8 +66,8 @@ struct WAVHeader {
     int subchunk2Size;
 };
 
-// Function to read a WAV file and return a vector of samples
-std::vector<std::vector<double>> readWAVFile(const std::string& fileName) {
+    // Function to read a WAV file and return a vector of samples
+    std::vector<std::vector<double>> readWAVFile(const std::string& fileName) {
     // Open the WAV file
     std::ifstream file(fileName, std::ios::binary);
     if (!file.is_open()) {
@@ -134,7 +134,6 @@ double FindAudioEuclideanDistance(const std::vector<std::vector<double>>& s1, co
     // assuming both signals have the same number of channels
     int numChannels = s1.size();
     for (int channel = 0; channel < numChannels; channel++) {
-            std::cout<<s1[channel].size();
         for (int i = 0; i < s1[channel].size(); i++) {
             distance += pow(s1[channel][i] - s2[channel][i], 2);
         }
@@ -142,16 +141,36 @@ double FindAudioEuclideanDistance(const std::vector<std::vector<double>>& s1, co
     return sqrt(distance);
 }
 
-// int main() {
-//     // Example usage of the euclideanDistance() function
-//     std::vector<double> signal1 = {1, 2, 3, 4, 5};
-//     std::vector<double> signal2 = {5, 4, 3, 2, 1};
-//     double distance = euclideanDistance(signal1, signal2);
-//     std::cout << "Euclidean distance: " << distance << std::endl;
-//     return 0;
-// }
 
-// double EuclideanDistanceForVariedAmplitude() {}  
+// double FindCorrelation_VariedAmplitude(const std::vector<std::vector<double>>& s1, const std::vector<std::vector<double>>& s2) {
+//     //correlation = y2/y1 - x2/x1
+//     double correlation_factor = 0;
+//     int numChannels = s1.size();
+//     for (int channel = 0; channel < numChannels; channel++) {
+//         for(int i =0; i<s1[channel].size()-1;i++) {
+//             if (s1[channel][i+1] != 0 && s1[channel][i] != 0 && s2[channel][i+1] != 0 && s2[channel][i] != 0) {
+//                 correlation_factor += (s1[channel][i+1] / s1[channel][i]) - (s2[channel][i+1] / s2[channel][i]);
+//         }}
+//     }
+//     return correlation_factor;
+// }  
+
+double checkAmplitudeRatio(const std::vector<std::vector<double>>& x, const std::vector<std::vector<double>>& y) {
+    double x_amplitude = 0;
+    double y_amplitude = 0;
+    int numChannels = x.size();
+    for (int channel = 0; channel < numChannels; channel++) {
+        for (int i = 0; i < x[channel].size(); i++) {
+            x_amplitude += x[channel][i] * x[channel][i];
+            y_amplitude += y[channel][i] * y[channel][i];
+        }
+    }
+    x_amplitude = sqrt(x_amplitude);
+    y_amplitude = sqrt(y_amplitude);
+    double ratio = x_amplitude / y_amplitude;
+    return ratio;
+}
+
 
 void writeVectorToFile(const std::vector<std::vector<double>>& vec, const std::string& fileName) {
     std::ofstream outFile(fileName);
@@ -172,13 +191,16 @@ void writeVectorToFile(const std::vector<std::vector<double>>& vec, const std::s
 
 int main() {
     auto start = high_resolution_clock::now();
-    std::vector<std::vector<double>> audio1 = readWAVFile("/home/shripad/college/audio_proj/dataset/TrimmedAmbientSound/file2.wav");
+    std::vector<std::vector<double>> audio1 = readWAVFile("/home/shripad/college/audio_proj/dataset/TrimmedSawSound/file1.wav");
 
     std::vector<std::vector<double>> ref_sawing_sound = readWAVFile("/home/shripad/college/audio_proj/dataset/TrimmedSawSound/file2.wav");
 
-    writeVectorToFile(audio1,"/home/shripad/college/audio_proj/cpp_code/audio1.txt");
+    // writeVectorToFile(audio1,"/home/shripad/college/audio_proj/cpp_code/audio1.txt");
 
-    double similarity = FindAudioEuclideanDistance(audio1,ref_sawing_sound);    
+    double similarity = FindAudioEuclideanDistance(audio1,ref_sawing_sound);  
+    double ampRatio = checkAmplitudeRatio(audio1, ref_sawing_sound);
+    std::cout << "same signal but varied amplitude " << ampRatio << std::endl;
+
     std::cout << "Similarity: " << similarity << std::endl;
     std::cout<<checkSawingSound(similarity)<<std::endl;
     auto stop = high_resolution_clock::now();
